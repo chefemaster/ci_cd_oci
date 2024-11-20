@@ -1,0 +1,6 @@
+services:
+  webapitest:
+    image: ${DOCKER_REGISTRY-}webapitest
+    build:
+      context: .
+      dockerfile: WebApiTest/Dockerfile
