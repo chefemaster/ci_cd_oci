@@ -31,7 +31,7 @@ jobs:
 
         - name: Login to OCI
           run: |
-            echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_TENANCY_NAMESPACE }}/jeferson.m.bruno@gmail.com' --password-stdin 
+            echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}'' --password-stdin 
 
         - name: Push docker image to OCI
           run: |
