@@ -27,7 +27,7 @@ jobs:
         # para saber qual a URL do Registry da OCI para a região que você está utilizando
         - name: Build Docker image
           run: |            
-            docker build -f WebApiTest/WebApiTest/Dockfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest WebApiTest/.
+            docker build -f WebApiTest/WebApiTest/Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest WebApiTest/.
 
         - name: Login to OCI
           run: |
