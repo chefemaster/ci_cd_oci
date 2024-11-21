@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        
+        # Configuração do .NET
+        - name: Set up .NET
+          uses: actions/setup-dotnet@v1
+          with:
+            dotnet-version: 8.0.x
+        
+        - name: Install dependencies
+          run: dotnet restore
+
+        # Envio da imagem para o Registry da OCI
+        - name: Build
+          run: |
+            dotnet build -c Release -o out
+
+        # consultar a url: "https://docs.oracle.com/pt-br/iaas/Content/Registry/Concepts/registryprerequisites.htm#regional-availability" 
+        # para saber qual a URL do Registry da OCI para a região que você está utilizando
+        - name: Build Docker image
+          run: |
+            docker build . -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest .
+
+        - name: Login to OCI
+          run: |
+            echo ${{ secrets.OCI_AUTH_TOKEN }} | docker login sa-saopaulo-1.ocir.io -u 'jefersonmbruno/jeferson.m.bruno@gmail.com' --password-stdin 
+
+        - name: Push docker image to OCI
+          run: |
+            docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
