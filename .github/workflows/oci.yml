@@ -58,8 +58,10 @@ jobs:
           source ~/.bashrc
 
       - name: Create OCI Instance
+        id: instancia
         env:
           PATH: $PATH:/home/runner/bin
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           INSTANCE = $(oci compute instance launch \
             --display-name "oci-demo" \
