@@ -54,7 +54,8 @@ jobs:
         run: |
           curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
           bash install.sh --accept-all-defaults
-          exec -l $SHELL
+          echo 'export PATH=$PATH:/home/runner/bin' >> ~/.bashrc
+          source ~/.bashrc
 
       - name: Create OCI Instance
         run: |
