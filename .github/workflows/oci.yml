@@ -4,35 +4,82 @@ on:
   workflow_dispatch:
     
 jobs:
-    build:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        
-        # Configuração do .NET
-        - name: Set up .NET
-          uses: actions/setup-dotnet@v1
-          with:
-            dotnet-version: 8.0.x
-        
-        - name: Install dependencies
-          run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Configuração do .NET
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.x
+      
+      - name: Install dependencies
+        run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
 
-        # Envio da imagem para o Registry da OCI
-        - name: Build
-          run: |
-            dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
+      # Envio da imagem para o Registry da OCI
+      - name: Build
+        run: |
+          dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
 
-        # consultar a url: "https://docs.oracle.com/pt-br/iaas/Content/Registry/Concepts/registryprerequisites.htm#regional-availability" 
-        # para saber qual a URL do Registry da OCI para a região que você está utilizando
-        - name: Build Docker image
-          run: |            
-            docker build -f WebApiTest/WebApiTest/Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest WebApiTest/.
+      # consultar a url: "https://docs.oracle.com/pt-br/iaas/Content/Registry/Concepts/registryprerequisites.htm#regional-availability" 
+      # para saber qual a URL do Registry da OCI para a região que você está utilizando
+      - name: Build Docker image
+        run: |            
+          docker build -f WebApiTest/WebApiTest/Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest WebApiTest/.
 
-        - name: Login to OCI
-          run: |
-            echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin 
+      - name: Login to OCI
+        run: |
+          echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin 
 
-        - name: Push docker image to OCI
-          run: |
-            docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
+      - name: Push docker image to OCI
+        run: |
+          docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
+  create-instance:
+    runs-on: ubuntu-lastest
+    steps:
+      - name: Inicia script
+        run: |
+          echo "Iniciando script"
+      - name: Create file configuration OCI
+        run: | 
+          mkdir -p ~/.oci          
+          echo "${{ secrets.OCI_PUBLIC_KEY }}" > ~/.oci/id_rsa.pub
+      - name: Install OCI CLI
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash      
+      - name: Create OCI Instance
+        run: |
+          INSTANCE = $(oci compute instance launch \
+            --display-name "oci-demo" \
+            --ssh-authorized-keys-file ~/.oci/id_rsa.pub \
+            --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" \
+            --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" \
+            --image-id "${{ secrets.OCI_IMAGE_ID }}" \
+            --shape "${{ secrets.OCI_SHAPE }}" \
+            --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
+            --wait-for-state RUNNING)
+          INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
+          echo "Instance ID: $INSTANCE_ID"
+          IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID | jq -r '.data[0]."public-ip"' --raw-output)
+          echo "::set-output name=IP::$(echo "$IP")"
+          echo "Public IP: $IP"
+      - name: 'Validar o acesso via SSH'
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          while ! nc -w5 -z ${{ steps.instancia.outputs.IP }} 22; do
+                  sleep 5
+                  echo "SSH not available..."
+          done; echo "SSH ready!"
+      - name: Test command SSH
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instancia.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: whoami
