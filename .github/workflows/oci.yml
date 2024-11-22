@@ -58,6 +58,8 @@ jobs:
           source ~/.bashrc
 
       - name: Create OCI Instance
+        env:
+          PATH: $PATH:/home/runner/bin
         run: |
           INSTANCE = $(oci compute instance launch \
             --display-name "oci-demo" \
