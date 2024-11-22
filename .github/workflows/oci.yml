@@ -63,7 +63,7 @@ jobs:
           PATH: $PATH:/home/runner/bin
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          INSTANCE = $(oci compute instance launch \
+          INSTANCE=$(oci compute instance launch \
             --display-name "oci-demo" \
             --ssh-authorized-keys-file ~/.oci/id_rsa.pub \
             --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" \
