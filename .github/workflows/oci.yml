@@ -52,11 +52,8 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-          echo "::add-path::/home/runner/bin"
-          exec -l $SHELL
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          bash install.sh --accept-all-defaults
 
       - name: Create OCI Instance
         run: |
