@@ -36,19 +36,24 @@ jobs:
   #     - name: Push docker image to OCI
   #       run: |
   #         docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
-  create-instance:
+  instance:
     runs-on: ubuntu-lastest
     steps:
       - name: Inicia script
         run: |
           echo "Iniciando script"
+      
       - name: Create file configuration OCI
         run: | 
           mkdir -p ~/.oci          
           echo "${{ secrets.OCI_PUBLIC_KEY }}" > ~/.oci/id_rsa.pub
+      
       - name: Install OCI CLI
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash      
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash
+
       - name: Create OCI Instance
         run: |
           INSTANCE = $(oci compute instance launch \
@@ -65,7 +70,8 @@ jobs:
           IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID | jq -r '.data[0]."public-ip"' --raw-output)
           echo "::set-output name=IP::$(echo "$IP")"
           echo "Public IP: $IP"
-      - name: 'Validar o acesso via SSH'
+
+      - name: Validar o acesso via SSH
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
@@ -73,6 +79,7 @@ jobs:
                   sleep 5
                   echo "SSH not available..."
           done; echo "SSH ready!"
+          
       - name: Test command SSH
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
