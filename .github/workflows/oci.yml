@@ -74,9 +74,9 @@ jobs:
             --wait-for-state RUNNING)
           INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
           echo "Instance ID: $INSTANCE_ID"
-          IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID | jq -r '.data[0]."public-ip"' --raw-output)
-          echo "::set-output name=IP::$(echo "$IP")"
+          IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
           echo "Public IP: $IP"
+          echo "::set-output name=IP::$(echo "$IP")"
 
       - name: Validar o acesso via SSH
         env:
