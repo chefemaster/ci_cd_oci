@@ -58,9 +58,12 @@ jobs:
           source ~/.bashrc
 
       - name: Verify OCI CLI Installation
+        env: 
+          PATH: $PATH:/home/runner/bin
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          which /home/runner/bin/oci
-          /home/runner/bin/oci --version
+          which oci
+          oci --version
 
       # - name: Create OCI Instance
       #   id: instancia
