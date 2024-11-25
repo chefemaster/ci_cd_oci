@@ -71,8 +71,7 @@ jobs:
 
       - name: Create OCI Instance
         id: instancia
-        env:
-          OCI_CLI_AUTH: instance_principal
+        env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           oci compute instance launch --display-name "oci-demo" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING
