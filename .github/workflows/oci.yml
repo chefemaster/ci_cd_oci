@@ -62,25 +62,24 @@ jobs:
           which oci
           oci --version
 
-      # - name: Create OCI Instance
-      #   id: instancia
-      #   env:
-      #     PATH: $PATH:/home/runner/bin
-      #     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      #   run: |
-      #     INSTANCE=$(oci compute instance launch \
-      #       --display-name "oci-demo" \
-      #       --ssh-authorized-keys-file ~/.oci/id_rsa.pub \
-      #       --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" \
-      #       --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" \
-      #       --image-id "${{ secrets.OCI_IMAGE_ID }}" \
-      #       --shape "${{ secrets.OCI_SHAPE }}" \
-      #       --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
-      #       --wait-for-state RUNNING)
-      #     INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
-      #     echo "Instance ID: $INSTANCE_ID"
-      #     IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
-      #     echo "Public IP: $IP"
+      - name: Create OCI Instance
+        id: instancia
+        env:          
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          INSTANCE=$(oci compute instance launch \
+            --display-name "oci-demo" \
+            --ssh-authorized-keys-file ~/.oci/id_rsa.pub \
+            --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" \
+            --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" \
+            --image-id "${{ secrets.OCI_IMAGE_ID }}" \
+            --shape "${{ secrets.OCI_SHAPE }}" \
+            --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
+            --wait-for-state RUNNING)
+          INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
+          echo "Instance ID: $INSTANCE_ID"
+          IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
+          echo "Public IP: $IP"
           
       # - name: Validar o acesso via SSH
       #   env:
