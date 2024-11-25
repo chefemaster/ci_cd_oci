@@ -76,10 +76,11 @@ jobs:
             --shape "${{ secrets.OCI_SHAPE }}" \
             --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
             --wait-for-state RUNNING)
-          INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
-          echo "Instance ID: $INSTANCE_ID"
-          IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
-          echo "Public IP: $IP"
+            
+      # INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
+      # echo "Instance ID: $INSTANCE_ID"
+      # IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
+      # echo "Public IP: $IP"
           
       # - name: Validar o acesso via SSH
       #   env:
