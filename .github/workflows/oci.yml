@@ -46,6 +46,8 @@ jobs:
         run: | 
           mkdir -p ~/.oci          
           echo "${{ secrets.OCI_PUBLIC_KEY }}" > ~/.oci/id_rsa.pub
+          echo "${{ secrets.CONFIG }}" >> ~/.oci/config
+          echo "${{ secrets.OCI_KEY_FILE }}" >> ~/.oci/key.pem
       
       - name: Install OCI CLI
         env:
@@ -61,6 +63,11 @@ jobs:
         run: |          
           which oci
           oci --version
+
+      - name: 'Corrigir permissoes de arquivos criados'
+        run: |
+          oci setup repair-file-permissions --file /home/runner/.oci/config
+          oci setup repair-file-permissions --file /home/runner/.oci/key.pem
 
       - name: Create OCI Instance
         id: instancia
