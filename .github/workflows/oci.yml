@@ -53,14 +53,12 @@ jobs:
         run: |
           curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
           bash install.sh --accept-all-defaults
-          echo "::add-path::/home/runner/bin"
-          exec -l $SHELL
+          echo "/home/runner/bin" >> $GITHUB_PATH          
 
       - name: Verify OCI CLI Installation
         env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-        run: |
-          
+        run: |          
           which oci
           oci --version
 
