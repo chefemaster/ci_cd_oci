@@ -55,12 +55,12 @@ jobs:
         run: |
           curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
           bash install.sh --accept-all-defaults
-          echo "/home/runner/bin" >> $GITHUB_PATH          
+          echo "/home/runner/bin" >> $GITHUB_PATH
 
       - name: Verify OCI CLI Installation
         env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-        run: |          
+        run: |
           which oci
           oci --version
 
@@ -73,7 +73,7 @@ jobs:
         id: instanced       
         env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-        run: |          
+        run: |
           INSTANCE_ID=$(oci compute instance list --display-name "oci-demo" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
           echo "Existe Instance ID: $INSTANCE_ID"          
           echo INSTANCE_ID=$INSTANCE_ID >> $GITHUB_OUTPUT
@@ -115,3 +115,34 @@ jobs:
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           port: 22
           script: whoami
+
+      - name: Install docker
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |
+            sudo dnf update -y
+            sudo dnf -y install dnf-plugins-core
+            sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin            
+            sudo usermod -aG docker $USER
+            newgrp docker
+            sudo systemctl enable --now docker
+      
+      - name: Pull docker image from OCI
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |
+            echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
+            docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
