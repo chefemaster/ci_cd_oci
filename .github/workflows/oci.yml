@@ -69,18 +69,18 @@ jobs:
           oci setup repair-file-permissions --file /home/runner/.oci/config
           oci setup repair-file-permissions --file /home/runner/.oci/key.pem
 
-      # - name: Exist OCI Instance 
-      #   id: instanced       
-      #   env:          
-      #     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      #   run: |          
-      #     INSTANCE_ID=$(oci compute instance list --display-name "oci-demo" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
-      #     echo "Existe Instance ID: $INSTANCE_ID"
-      #     if [ -z "$INSTANCE_ID" ]; then
-      #       echo "Instance não existe"
-      #     else
-      #       echo "Instance existe"            
-      #     fi
+      - name: Exist OCI Instance 
+        id: instanced       
+        env:          
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |          
+          INSTANCE_ID=$(oci compute instance list --display-name "oci-demo" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
+          echo "Existe Instance ID: $INSTANCE_ID"
+          if [ -z "$INSTANCE_ID" ]; then
+            echo "Instance não existe"
+          else
+            echo "Instance existe"            
+          fi
 
       - name: Create OCI Instance
         id: instancia
