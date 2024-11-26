@@ -64,12 +64,12 @@ jobs:
           which oci
           oci --version
 
-      - name: 'Corrigir permissoes de arquivos criados'
+      - name: Correct permission of the configuration files
         run: |
           oci setup repair-file-permissions --file /home/runner/.oci/config
           oci setup repair-file-permissions --file /home/runner/.oci/key.pem
 
-      - name: Exist OCI Instance 
+      - name: Check if OCI Instance Exists
         id: instanced       
         env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
@@ -96,14 +96,14 @@ jobs:
           echo "Public IP: $IP"
           echo IP=$IP >> $GITHUB_OUTPUT
           
-      # - name: Validar o acesso via SSH
-      #   env:
-      #     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      #   run: |
-      #     while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
-      #             sleep 5
-      #             echo "SSH not available..."
-      #     done; echo "SSH ready!"
+      - name: Verify access SSH
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
+                  sleep 5
+                  echo "SSH not available..."
+          done; echo "SSH ready!"
           
       # - name: Test command SSH
       #   env:
