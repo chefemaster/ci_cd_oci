@@ -81,19 +81,17 @@ jobs:
           else
             echo "Instance existe"            
           fi
-          echo INSTANCE_ID=$INSTANCE_ID >> $GITHUB_OUTPUT
+          echo INSTANCE=$INSTANCE_ID >> $GITHUB_OUTPUT
 
       - name: Create OCI Instance
         id: instance
         env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          if [ -z "${{ steps.instanced.output.INSTANCE_ID}}" ]; the
-            INSTANCE=$(oci compute instance launch --display-name "oci-demo" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --shape-config '{"ocpus": 2, "memoryInGBs": 16 }' --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING)
-            INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
-          else
-            echo "Instance já existe"
-            INSTANCE_ID=${{ steps.instanced.output.INSTANCE_ID }}
+          if [ -z "${{ steps.instanced.outputs.INSTANCE}}" ]; the
+            INSTANCE_ID=$(echo $(oci compute instance launch --display-name "oci-demo" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --shape-config '{"ocpus": 2, "memoryInGBs": 16 }' --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING) | jq -r '.data.id')            
+          else            
+            INSTANCE_ID=${{ steps.instanced.outputs.INSTANCE }}
           fi          
           echo "Instance ID: $INSTANCE_ID"
           IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
