@@ -81,9 +81,10 @@ jobs:
           else
             echo "Instance existe"            
           fi
+          echo INSTANCE_ID=$INSTANCE_ID >> $GITHUB_OUTPUT
 
       - name: Create OCI Instance
-        id: instancia
+        id: instance
         env:          
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
@@ -97,12 +98,13 @@ jobs:
           echo "Instance ID: $INSTANCE_ID"
           IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
           echo "Public IP: $IP"
+          echo IP=$IP >> $GITHUB_OUTPUT
           
       # - name: Validar o acesso via SSH
       #   env:
       #     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       #   run: |
-      #     while ! nc -w5 -z ${{ steps.instancia.outputs.IP }} 22; do
+      #     while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
       #             sleep 5
       #             echo "SSH not available..."
       #     done; echo "SSH ready!"
@@ -112,7 +114,7 @@ jobs:
       #     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       #   uses: appleboy/ssh-action@master
       #   with:
-      #     host: ${{ steps.instancia.outputs.IP }}
+      #     host: ${{ steps.instance.outputs.IP }}
       #     username: opc
       #     key: ${{ secrets.OCI_PRIVATE_KEY }}
       #     port: 22
