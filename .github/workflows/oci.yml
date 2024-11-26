@@ -105,13 +105,13 @@ jobs:
                   echo "SSH not available..."
           done; echo "SSH ready!"
           
-      # - name: Test command SSH
-      #   env:
-      #     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ steps.instance.outputs.IP }}
-      #     username: opc
-      #     key: ${{ secrets.OCI_PRIVATE_KEY }}
-      #     port: 22
-      #     script: whoami
+      - name: Test command SSH
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: whoami
