@@ -53,7 +53,7 @@ jobs:
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
           push: true
-          file: ./WebApiTest/_ARM_Dockerfile
+          file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
 #        run: |
 #          docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
 
