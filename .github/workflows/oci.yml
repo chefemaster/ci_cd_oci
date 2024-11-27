@@ -142,7 +142,7 @@ jobs:
           port: 22
           script: whoami
 
-      - name: Install docker
+      - name: Update instance
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         uses: appleboy/ssh-action@master
@@ -153,6 +153,17 @@ jobs:
           port: 22
           script: |
             sudo dnf update -y
+
+      - name: Install docker
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |            
             sudo dnf -y install dnf-plugins-core
             sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
             sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin            
