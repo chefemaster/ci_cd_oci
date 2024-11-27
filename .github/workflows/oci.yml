@@ -5,7 +5,10 @@ on:
 
 jobs:
   build:
-    runs-on: [linux, ARM64]
+    runs-on: ubuntu-latest    
+    strategy:
+      matrix:
+        platform: [linux/arm64]
     steps:
       - uses: actions/checkout@v2
 
