@@ -123,13 +123,16 @@ jobs:
           echo IP=$IP >> $GITHUB_OUTPUT
           
       - name: Verify access SSH
+        if: success()
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          if[! nc -w5 -z ${{ steps.instance.outputs.IP }} 22]; then                  
+          NC_OUPUT=$(nc -w5 -z ${{ steps.instance.outputs.IP }} 22 2>&1)
+          if[ -z "$NC_OUTPUT" ]; then
             echo "SSH not available..."
-          fi 
-          echo "SSH ready!"
+          else 
+            echo "SSH available..."
+          fi           
           
       - name: Test command SSH
         env:
