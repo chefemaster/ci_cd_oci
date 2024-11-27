@@ -5,10 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest    
-    strategy:
-      matrix:
-        platform: [linux/arm64]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
@@ -40,12 +37,6 @@ jobs:
         uses: docker/setup-qemu-action@v2
         with:
           platforms: arm64
-      
-      # Envio da imagem para o Registry da OCI
-      - name: Show architecture docker
-        run: |
-          docker buildx create --use
-          docker buildx inspect --bootstrap
 
       - name: Login to OCI
         uses: docker/login-action@v3.3.0
