@@ -127,13 +127,12 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          NC_OUPUT=$(nc -w5 -z ${{ steps.instance.outputs.IP }} 22 2>&1)
+          NC_OUTPUT=$(nc -w5 -z ${{ steps.instance.outputs.IP }} 22 2>&1)
           if[ -z "$NC_OUTPUT" ]; then
             echo "SSH not available..."
           else 
             echo "SSH available..."
-          fi           
-          
+          fi
       - name: Test command SSH
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
