@@ -18,16 +18,17 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # - name: Install dependencies
-      #   run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
+      - name: Install dependencies
+        run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
 
       # Envio da imagem para o Registry da OCI
-      # - name: Build
-      #   run: |
-      #     dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
+      - name: Build
+        run: |
+          dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
 
       - name: Build Docker image
         run: |
+          docker buildx inspect --bootstrap
           cd WebApiTest
           docker buildx build --platform linux/arm64 -f WebApiTest/_ARM_Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }} .
 
