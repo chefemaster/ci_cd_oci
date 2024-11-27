@@ -4,36 +4,36 @@ on:
   workflow_dispatch:
 
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     # Configuração do .NET
-  #     - name: Set up .NET
-  #       uses: actions/setup-dotnet@v1
-  #       with:
-  #         dotnet-version: 8.0.x
+      # Configuração do .NET
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.x
 
-  #     - name: Install dependencies
-  #       run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
+      - name: Install dependencies
+        run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
 
-  #     # Envio da imagem para o Registry da OCI
-  #     - name: Build
-  #       run: |
-  #         dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
+      # Envio da imagem para o Registry da OCI
+      - name: Build
+        run: |
+          dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
 
-  #     - name: Build Docker image
-  #       run: |
-  #         docker build -f WebApiTest/WebApiTest/Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest WebApiTest/.
+      - name: Build Docker image
+        run: |
+          docker build -f WebApiTest/WebApiTest/Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER} WebApiTest/.
 
-  #     - name: Login to OCI
-  #       run: |
-  #         echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
+      - name: Login to OCI
+        run: |
+          echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
 
-  #     - name: Push docker image to OCI
-  #       run: |
-  #         docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
+      - name: Push docker image to OCI
+        run: |
+          docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER}
 
   instance:
     runs-on: ubuntu-latest
@@ -145,4 +145,4 @@ jobs:
           port: 22
           script: |
             echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
-            docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
+            docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER}
