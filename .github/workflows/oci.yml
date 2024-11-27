@@ -24,8 +24,8 @@ jobs:
           dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
 
       - name: Build Docker image
-        run: |
-          docker build -f WebApiTest/WebApiTest/Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER} WebApiTest/.
+        run: |          
+          docker buildx build --platform linux/arm64 -f WebApiTest/WebApiTest/_ARM_Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER} WebApiTest/.
 
       - name: Login to OCI
         run: |
@@ -58,7 +58,7 @@ jobs:
           echo "/home/runner/bin" >> $GITHUB_PATH
 
       - name: Verify OCI CLI Installation
-        env:          
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           which oci
@@ -71,7 +71,7 @@ jobs:
 
       - name: Check if OCI Instance Exists
         id: instanced       
-        env:          
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           INSTANCE_ID=$(oci compute instance list --display-name "oci-demo" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
@@ -80,7 +80,7 @@ jobs:
 
       - name: Create OCI Instance
         id: instance
-        env:          
+        env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           if [ -z "${{ steps.instanced.outputs.INSTANCE_ID}}" ]; then
