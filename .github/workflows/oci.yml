@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Docker image
         run: |          
-          docker buildx build --platform linux/arm64 -f WebApiTest/WebApiTest/_ARM_Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER} WebApiTest/.
+          docker buildx build --platform linux/arm64 -f WebApiTest/WebApiTest/_ARM_Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }} WebApiTest/.
 
       - name: Login to OCI
         run: |
@@ -33,9 +33,10 @@ jobs:
 
       - name: Push docker image to OCI
         run: |
-          docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER}
+          docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
 
   instance:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Inicia script
@@ -74,7 +75,7 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          INSTANCE_ID=$(oci compute instance list --display-name "oci-demo" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
+          INSTANCE_ID=$(oci compute instance list --display-name "oci-demo-${{ github.run_number }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
           echo "Existe Instance ID: $INSTANCE_ID"          
           echo INSTANCE_ID=$INSTANCE_ID >> $GITHUB_OUTPUT
 
@@ -85,7 +86,7 @@ jobs:
         run: |
           if [ -z "${{ steps.instanced.outputs.INSTANCE_ID}}" ]; then
             echo "Instance não existe"
-            INSTANCE=$(oci compute instance launch --display-name "oci-demo" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --shape-config '{"ocpus": 2, "memoryInGBs": 16 }' --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING)
+            INSTANCE=$(oci compute instance launch --display-name "oci-demo-${{ github.run_number }}" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --shape-config '{"ocpus": 2, "memoryInGBs": 16 }' --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING)
             INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
           else
             echo "Instance existe"
@@ -100,10 +101,10 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
-                  sleep 5
-                  echo "SSH not available..."
-          done; echo "SSH ready!"
+          if[! nc -w5 -z ${{ steps.instance.outputs.IP }} 22]; then                  
+            echo "SSH not available..."
+          fi 
+          echo "SSH ready!"
           
       - name: Test command SSH
         env:
@@ -145,4 +146,4 @@ jobs:
           port: 22
           script: |
             echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
-            docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER}
+            docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
