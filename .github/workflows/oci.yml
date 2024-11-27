@@ -23,12 +23,6 @@ jobs:
         run: |
           dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
 
-#      - name: Build Docker image
-#        run: |
-#          docker buildx inspect --bootstrap
-#          cd WebApiTest
-#          docker buildx build --platform linux/arm64 -f WebApiTest/_ARM_Dockerfile -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }} .
-
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v3.7.1
 
@@ -44,8 +38,6 @@ jobs:
           registry: sa-saopaulo-1.ocir.io
           username: ${{ secrets.OCI_USERNAME }}
           password: ${{ secrets.OCI_AUTH_TOKEN }}
-#        run: |
-#          echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
       
       - name: Push docker image to OCI
         uses: docker/build-push-action@v6.10.0
@@ -57,8 +49,6 @@ jobs:
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
           push: true
           file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
-#        run: |
-#          docker push sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
 
   instance:
     needs: build
@@ -122,7 +112,7 @@ jobs:
           echo "Public IP: $IP"
           echo IP=$IP >> $GITHUB_OUTPUT
           
-      - name: Verify access SSH        
+      - name: Verify access SSH
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
@@ -183,3 +173,18 @@ jobs:
           script: |
             echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
             docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
+      
+      - name: Start Docker-Compose
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |
+            mkdir ~/docker
+            echo "${{ secrets.DOCKER_COMPOSE }}" >> ~/docker/docker-compose.yml
+            sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
+            docker-compose -f ~/docker/docker-compose.yml up -d
