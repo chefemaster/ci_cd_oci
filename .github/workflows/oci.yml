@@ -117,7 +117,7 @@ jobs:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
-                  sleep 5
+                  sleep 10
                   echo "SSH not available..."
           done; echo "SSH ready!"
 
@@ -175,5 +175,5 @@ jobs:
           script: |
             mkdir ~/docker
             echo "${{ secrets.DOCKER_COMPOSE }}" >> ~/docker/docker-compose.yml
-            sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
+            sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io\/${{ secrets.OCI_TENANCY_NAMESPACE }}\/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
             docker compose -f ~/docker/docker-compose.yml up -d
