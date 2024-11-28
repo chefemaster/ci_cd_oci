@@ -30,8 +30,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
-      #- name: Try install QEMU ARM emulator
-      - shell: script -e -c {0}
+      - name: Try install QEMU ARM emulator
         run: |
           docker run -it --rm --privileged tonistiigi/binfmt --install all
           docker buildx ls
