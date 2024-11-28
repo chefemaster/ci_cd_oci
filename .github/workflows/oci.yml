@@ -121,17 +121,6 @@ jobs:
                   echo "SSH not available..."
           done; echo "SSH ready!"
 
-      - name: Test command SSH
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ steps.instance.outputs.IP }}
-          username: opc
-          key: ${{ secrets.OCI_PRIVATE_KEY }}
-          port: 22
-          script: whoami
-
       - name: Update instance
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
@@ -186,5 +175,5 @@ jobs:
           script: |
             mkdir ~/docker
             echo "${{ secrets.DOCKER_COMPOSE }}" >> ~/docker/docker-compose.yml
-            sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io\/${{ secrets.OCI_TENANCY_NAMESPACE }}\/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
+            sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
             docker-compose -f ~/docker/docker-compose.yml up -d
