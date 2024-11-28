@@ -6,22 +6,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm/v6
+          - linux/arm/v7
+          - linux/arm64
+
     steps:
       - uses: actions/checkout@v2
 
       # Configuração do .NET
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 8.0.x
+      # - name: Set up .NET
+      #   uses: actions/setup-dotnet@v1
+      #   with:
+      #     dotnet-version: 8.0.x
 
-      - name: Install dependencies
-        run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
+      # - name: Install dependencies
+      #   run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
 
       # Envio da imagem para o Registry da OCI
-      - name: Build
-        run: |
-          dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
+      # - name: Build
+      #   run: |
+      #     dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v3.7.1
@@ -41,16 +50,23 @@ jobs:
           username: ${{ secrets.OCI_USERNAME }}
           password: ${{ secrets.OCI_AUTH_TOKEN }}
       
-      - name: Push docker image to OCI
-        uses: docker/build-push-action@v6.10.0
-        with:
-          context: ./WebApiTest
-          platforms: linux/arm64, linux/arm/v7
-          tags: |
-            sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
-            sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
-          push: true
-          file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
+      # - name: Push docker image to OCI
+      #   uses: docker/build-push-action@v6.10.0
+      #   with:
+      #     context: ./WebApiTest
+      #     platforms: linux/arm64
+      #     tags: |
+      #       sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
+      #       sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
+      #     push: true
+      #     file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
+
+      - name: Build Docker image
+        run: |
+          docker build \
+
+            -f WebApiTest/WebApiTest/Dockerfile \
+            -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER} WebApiTest/.
 
   # instance:
   #   needs: build
