@@ -32,7 +32,6 @@ jobs:
 
       - name: Try install QEMU ARM emulator
         run: |
-          docker run -it --rm --privileged tonistiigi/binfmt --install all
           docker buildx ls
 
       - name: Login to OCI
