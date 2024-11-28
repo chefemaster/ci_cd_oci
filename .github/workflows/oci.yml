@@ -125,7 +125,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ steps.instance.outputs.IP }}
-          username: opc
+          username: ubuntu
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           port: 22
           script: |
@@ -137,7 +137,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ steps.instance.outputs.IP }}
-          username: opc
+          username: ubuntu
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           port: 22
           script: |
@@ -161,7 +161,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ steps.instance.outputs.IP }}
-          username: opc
+          username: ubuntu
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           port: 22
           script: |
@@ -174,7 +174,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ steps.instance.outputs.IP }}
-          username: opc
+          username: ubuntu
           key: ${{ secrets.OCI_PRIVATE_KEY }}
           port: 22
           script: |
