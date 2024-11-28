@@ -41,137 +41,137 @@ jobs:
         uses: docker/build-push-action@v6.10.0
         with:
           context: ./WebApiTest
-          platforms: linux/arm64, linux/amd64, linux/arm/v7
+          platforms: linux/arm64, linux/arm/v7
           tags: |
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
           push: true
           file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
 
-  # instance:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Inicia script
-  #       run: |
-  #         echo "Iniciando script"
+  instance:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inicia script
+        run: |
+          echo "Iniciando script"
       
-  #     - name: Create file configuration OCI
-  #       run: | 
-  #         mkdir -p ~/.oci          
-  #         echo "${{ secrets.OCI_PUBLIC_KEY }}" > ~/.oci/id_rsa.pub
-  #         echo "${{ secrets.CONFIG }}" >> ~/.oci/config
-  #         echo "${{ secrets.OCI_KEY_FILE }}" >> ~/.oci/key.pem
+      - name: Create file configuration OCI
+        run: | 
+          mkdir -p ~/.oci          
+          echo "${{ secrets.OCI_PUBLIC_KEY }}" > ~/.oci/id_rsa.pub
+          echo "${{ secrets.CONFIG }}" >> ~/.oci/config
+          echo "${{ secrets.OCI_KEY_FILE }}" >> ~/.oci/key.pem
       
-  #     - name: Install OCI CLI
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       run: |
-  #         curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
-  #         bash install.sh --accept-all-defaults
-  #         echo "/home/runner/bin" >> $GITHUB_PATH
+      - name: Install OCI CLI
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          bash install.sh --accept-all-defaults
+          echo "/home/runner/bin" >> $GITHUB_PATH
 
-  #     - name: Verify OCI CLI Installation
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       run: |
-  #         which oci
-  #         oci --version
+      - name: Verify OCI CLI Installation
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          which oci
+          oci --version
 
-  #     - name: Correct permission of the configuration files
-  #       run: |
-  #         oci setup repair-file-permissions --file /home/runner/.oci/config
-  #         oci setup repair-file-permissions --file /home/runner/.oci/key.pem
+      - name: Correct permission of the configuration files
+        run: |
+          oci setup repair-file-permissions --file /home/runner/.oci/config
+          oci setup repair-file-permissions --file /home/runner/.oci/key.pem
 
-  #     - name: Check if OCI Instance Exists
-  #       id: instanced       
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       run: |
-  #         INSTANCE_ID=$(oci compute instance list --display-name "oci-demo-${{ github.run_number }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
-  #         echo "Existe Instance ID: $INSTANCE_ID"          
-  #         echo INSTANCE_ID=$INSTANCE_ID >> $GITHUB_OUTPUT
+      - name: Check if OCI Instance Exists
+        id: instanced       
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          INSTANCE_ID=$(oci compute instance list --display-name "oci-demo-${{ github.run_number }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --query 'data[0].id' --raw-output)          
+          echo "Existe Instance ID: $INSTANCE_ID"          
+          echo INSTANCE_ID=$INSTANCE_ID >> $GITHUB_OUTPUT
 
-  #     - name: Create OCI Instance
-  #       id: instance
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       run: |
-  #         if [ -z "${{ steps.instanced.outputs.INSTANCE_ID}}" ]; then
-  #           echo "Instance não existe"
-  #           INSTANCE=$(oci compute instance launch --display-name "oci-demo-${{ github.run_number }}" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --shape-config '{"ocpus": 2, "memoryInGBs": 16 }' --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING)
-  #           INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
-  #         else
-  #           echo "Instance existe"
-  #           INSTANCE_ID=${{ steps.instanced.outputs.INSTANCE_ID }}
-  #         fi          
-  #         echo "Instance ID: $INSTANCE_ID"
-  #         IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
-  #         echo "Public IP: $IP"
-  #         echo IP=$IP >> $GITHUB_OUTPUT
+      - name: Create OCI Instance
+        id: instance
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          if [ -z "${{ steps.instanced.outputs.INSTANCE_ID}}" ]; then
+            echo "Instance não existe"
+            INSTANCE=$(oci compute instance launch --display-name "oci-demo-${{ github.run_number }}" --ssh-authorized-keys-file ~/.oci/id_rsa.pub --availability-domain "${{ secrets.OCI_AVAILABILITY_DOMAIN }}" --compartment-id "${{ secrets.OCI_COMPARTMENT_ID }}" --image-id "${{ secrets.OCI_IMAGE_ID }}" --shape "${{ secrets.OCI_SHAPE }}" --shape-config '{"ocpus": 2, "memoryInGBs": 16 }' --subnet-id "${{ secrets.OCI_SUBNET_ID }}" --wait-for-state RUNNING)
+            INSTANCE_ID=$(echo $INSTANCE | jq -r '.data.id')
+          else
+            echo "Instance existe"
+            INSTANCE_ID=${{ steps.instanced.outputs.INSTANCE_ID }}
+          fi          
+          echo "Instance ID: $INSTANCE_ID"
+          IP=$(oci compute instance list-vnics --instance-id $INSTANCE_ID --query 'data[0]."public-ip"' --raw-output)
+          echo "Public IP: $IP"
+          echo IP=$IP >> $GITHUB_OUTPUT
           
-  #     - name: Verify access SSH
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       run: |
-  #         while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
-  #                 sleep 10
-  #                 echo "SSH not available..."
-  #         done; echo "SSH ready!"
+      - name: Verify access SSH
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          while ! nc -w5 -z ${{ steps.instance.outputs.IP }} 22; do
+                  sleep 10
+                  echo "SSH not available..."
+          done; echo "SSH ready!"
 
-  #     - name: Update instance
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ steps.instance.outputs.IP }}
-  #         username: opc
-  #         key: ${{ secrets.OCI_PRIVATE_KEY }}
-  #         port: 22
-  #         script: |
-  #           sudo dnf update -y
+      - name: Update instance
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |
+            sudo dnf update -y
 
-  #     - name: Install docker
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ steps.instance.outputs.IP }}
-  #         username: opc
-  #         key: ${{ secrets.OCI_PRIVATE_KEY }}
-  #         port: 22
-  #         script: |            
-  #           sudo dnf -y install dnf-plugins-core
-  #           sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-  #           sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin            
-  #           sudo usermod -aG docker $USER
-  #           newgrp docker
-  #           sudo systemctl enable --now docker
+      - name: Install docker
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |            
+            sudo dnf -y install dnf-plugins-core
+            sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            sudo dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin            
+            sudo usermod -aG docker $USER
+            newgrp docker
+            sudo systemctl enable --now docker
       
-  #     - name: Pull docker image from OCI
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ steps.instance.outputs.IP }}
-  #         username: opc
-  #         key: ${{ secrets.OCI_PRIVATE_KEY }}
-  #         port: 22
-  #         script: |
-  #           echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
-  #           docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
+      - name: Pull docker image from OCI
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |
+            echo "${{ secrets.OCI_AUTH_TOKEN }}" | docker login sa-saopaulo-1.ocir.io -u '${{ secrets.OCI_USERNAME }}' --password-stdin
+            docker pull sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
       
-  #     - name: Start Docker-Compose
-  #       env:
-  #         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-  #       uses: appleboy/ssh-action@master
-  #       with:
-  #         host: ${{ steps.instance.outputs.IP }}
-  #         username: opc
-  #         key: ${{ secrets.OCI_PRIVATE_KEY }}
-  #         port: 22
-  #         script: |
-  #           mkdir ~/docker
-  #           echo "${{ secrets.DOCKER_COMPOSE }}" >> ~/docker/docker-compose.yml
-  #           sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io\/${{ secrets.OCI_TENANCY_NAMESPACE }}\/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
-  #           docker compose -f ~/docker/docker-compose.yml up -d
+      - name: Start Docker-Compose
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ steps.instance.outputs.IP }}
+          username: opc
+          key: ${{ secrets.OCI_PRIVATE_KEY }}
+          port: 22
+          script: |
+            mkdir ~/docker
+            echo "${{ secrets.DOCKER_COMPOSE }}" >> ~/docker/docker-compose.yml
+            sed -i 's/image: <image>/image: sa-saopaulo-1.ocir.io\/${{ secrets.OCI_TENANCY_NAMESPACE }}\/oci-demo:${{ github.run_number }}/' ~/docker/docker-compose.yml
+            docker compose -f ~/docker/docker-compose.yml up -d
