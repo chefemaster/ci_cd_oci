@@ -1,12 +1,14 @@
 # CI/CD via OCI
 
 ## About
-Implementação do projeto web basico em .Net 8 para teste de criação de instância de máquina OCI via gitaction.
+Implementação do projeto basico em WEB usando .Net 9 para realização da criação de scripts de automação do Github Actions.
+Criação de instância de maquina na OCI, geração de imagem docker na arquitetura ARM64 e implantação do docker na instância em funcionamento.
 
 ## Requerimentos
 - Plataforma oracle cloud infraestruct (OCI)
 - Projeto básico em C# para teste
 - Criação do script de GitAction 
+- Scripts Docker
 
 ## License
 Copyright 2024
