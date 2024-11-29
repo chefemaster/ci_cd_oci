@@ -50,8 +50,7 @@ jobs:
       - name: Push docker image to OCI
         uses: docker/build-push-action@v6.10.0
         with:
-          context: ./WebApiTest
-          platforms: linux/arm64
+          context: ./WebApiTest          
           tags: |
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
