@@ -57,11 +57,4 @@ jobs:
             sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
           push: true
           file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
-
-      # - name: Build Docker image
-      #   run: |
-      #     docker build \
-      #       -f WebApiTest/WebApiTest/Dockerfile \
-      #       -t sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${GITHUB_RUN_NUMBER} WebApiTest/.
-
   
