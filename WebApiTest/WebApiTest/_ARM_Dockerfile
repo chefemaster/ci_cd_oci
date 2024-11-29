@@ -15,7 +15,7 @@ WORKDIR /src
 COPY . .
 WORKDIR /src/WebApiTest
 
-RUN dotnet restore "./WebApiTest.csproj" --verbosity d --no-cache
+RUN dotnet restore "./WebApiTest.csproj"
 
 RUN dotnet build "./WebApiTest.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
