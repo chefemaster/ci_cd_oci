@@ -6,8 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
+    strategy:      
       matrix:
         platform:
           - linux/arm64
@@ -15,22 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Configuração do .NET
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Install dependencies
-        run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
+      # - name: Install dependencies
+      #   run: dotnet restore WebApiTest/WebApiTest/WebApiTest.csproj
 
       # Envio da imagem para o Registry da OCI
-      - name: Build
-        run: |
-          dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
+      # - name: Build
+      #   run: |
+      #     dotnet build WebApiTest/WebApiTest/WebApiTest.csproj -c Release -o out
                 
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v3.7.1
+        uses: docker/setup-buildx-action@v3
 
       # Configurar QEMU para emulação ARM
       - name: Set up QEMU
@@ -38,21 +31,39 @@ jobs:
         with:
           platforms: arm64
 
+      # Configuração do .NET
+      # - name: Set up .NET
+      #   uses: actions/setup-dotnet@v4
+      #   with:
+      #     dotnet-version: '9.0'
+
+      - name: Install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libicu-dev
+
+      - name: Download ARM64 .NET SDK
+        run: |
+          wget https://download.visualstudio.microsoft.com/download/pr/6f79d99b-dc38-4c44-a549-32329419bb9f/a411ec38fb374e3a4676647b236ba021/dotnet-sdk-9.0.100-linux-arm64.tar.gz -O dotnet-arm64.tar.gz
+          mkdir -p $HOME/dotnet
+          tar -xzf dotnet-arm64.tar.gz -C $HOME/dotnet
+          export DOTNET_ROOT=$HOME/dotnet
+          export PATH=$HOME/dotnet:$PATH
+
       - name: Login to OCI
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@v3
         with:
           registry: sa-saopaulo-1.ocir.io
           username: ${{ secrets.OCI_USERNAME }}
           password: ${{ secrets.OCI_AUTH_TOKEN }}
       
       - name: Push docker image to OCI
-        uses: docker/build-push-action@v6.10.0
+        uses: docker/build-push-action@v6
         with:
           context: ./WebApiTest
           platforms: linux/arm64
-          tags: |
-            sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}
-            sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:latest
           push: true
+          tags: |
+            sa-saopaulo-1.ocir.io/${{ secrets.OCI_TENANCY_NAMESPACE }}/oci-demo:${{ github.run_number }}            
           file: ./WebApiTest/WebApiTest/_ARM_Dockerfile
   
