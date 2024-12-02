@@ -32,10 +32,10 @@ jobs:
           platforms: arm64
 
       # Configuração do .NET
-      # - name: Set up .NET
-      #   uses: actions/setup-dotnet@v4
-      #   with:
-      #     dotnet-version: '9.0'
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
 
       - name: Install prerequisites
         run: |
